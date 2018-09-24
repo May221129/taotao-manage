@@ -1,0 +1,36 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+	
+	<!-- spring和redis的整合文件： -->
+	<!-- 
+		 因为导入了Spring Data Redis依赖，里面包含了操作Redis的各种工具，所以这里就不用自己实现的了。
+		 Spring Data Redis还可以用于消息的发布和订阅，
+		 这一功能用于一旦B端的商品详情或商品类目发生了更新，就会发布消息通知到C端，C端的redis缓存的同步。
+		 详情见：https://blog.csdn.net/jslcylcy/article/details/78201812
+	-->
+	
+	<!-- 连接池配置 -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxTotal" value="${myRedis.maxTotal}"></property>
+	</bean>
+	
+	<!-- 分片式集群连接池 -->
+	<bean class="redis.clients.jedis.ShardedJedisPool">
+		<constructor-arg index="0" ref="jedisPoolConfig"></constructor-arg>
+		<constructor-arg index="1" >
+			<list>
+				<bean class="redis.clients.jedis.JedisShardInfo">
+					<constructor-arg index="0" value="${myRedis.node1.host}"></constructor-arg>
+					<constructor-arg index="1" value="${myRedis.node1.port}"></constructor-arg>
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+
+</beans>

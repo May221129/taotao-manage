@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	
+	<!-- springmvc的配置： -->
+	
+	<!-- 为什么这里要配置这个bean？又为什么注释掉了这个bean？
+		 详见：taotao-manage-web/com.taotao/com.taotao.manage.controller/PicUploadController.java -->
+	<!-- 
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:environment.properties</value>
+			</list>
+		</property>
+	</bean>
+	 -->
+	 
+	<!-- 注解驱动，作用：默认配置的升级版，原来的默认配置过期了。不是必须的，没有配置它springmvc也可以用。 -->
+	<mvc:annotation-driven>
+		<!-- 1.自定义String类型的消息转化器：
+			 从springmvc的org.springframework.web.servlet.config.AnnotationDrivenBeanDefinitionParser.class，有对controller的响应数据做转化，
+			 其中，String类型的消息转化器用的编码规则是“IOS-8859-1”,不支持中文，所以这里需要自定义String类型的消息转化器。
+			 2. register-defaults="false":springmvc有自己默认的String类型消息转化器，现在自己又自定义了一个，
+			 就可以将register-defaults设置为false，不再注册默认String消息转化器了。
+			 一般情况都是配置为true -->
+		<mvc:message-converters register-defaults="true">
+			<!-- <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<constructor-arg index="0" value="UTF-8"></constructor-arg>
+			</bean> -->
+			
+			<!-- jsonp: -->
+			<bean class="com.taotao.common.spring.exetend.converter.json.CallbackMappingJackson2HttpMessageConverter">
+				<property name="callbackName" value="callback"></property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	<!-- 扫描Controller，不能省略 -->
+	<context:component-scan base-package="com.taotao.manage.controller"/>
+	
+	<!-- 视图解析器 -->
+	<!-- 
+		Example: prefix="/WEB-INF/jsp/", suffix=".jsp", viewname="test" -> "/WEB-INF/jsp/test.jsp" 
+	 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+	
+	<!-- 文件上传解析器 
+		 注意：id必须为"multipartResolver"，因为内部会通过该id来查找这个bean。-->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 最大的文件大小为5MB。下面的单位为：byte/字节 -->
+		<property name="maxUploadSize" value="5242880"/>
+	</bean>
+	
+	<!-- 配置SimpleMappingExceptionResolver-使所有异常进行统一处理:出现某个异常及转到哪个页面的处理 -->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<!-- 自定义异常的属性名，但一般不对异常的属性名进行配置，用默认的exception即可 -->
+		<!-- <property name="exceptionAttribute" value="ex"></property> -->
+	</bean>
+	
+</beans>

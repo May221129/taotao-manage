@@ -1,0 +1,3 @@
+
+该com/taotao/manage/controller包中存放的controller，都是后台系统自己需要用到的controller。
+而其下一级api包中，存放的都是提供给前台系统用的controller。
